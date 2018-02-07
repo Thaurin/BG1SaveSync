@@ -5,14 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BG1SaveSync"
         mc:Ignorable="d"
-        Title="BG1SaveSync" Width="525" Height="238"
+        Title="BG1SaveSync" Width="525" Height="310"
         ResizeMode="CanMinimize">
     <Grid>
         <WrapPanel Margin="10,0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top">
             <Label Content="Baldur's Gate 1 save game folder" HorizontalAlignment="Left" VerticalAlignment="Top" Height="27"/>
             <TextBox Name="SaveDirTextBox" IsReadOnly="True" HorizontalAlignment="Left" Width="425" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" />
             <Button Name="SaveDirBrowseButton" Content="Browse" Margin="5,0" Width="50" Height="23" Click="BrowseButton_Click" />
-            <Label Content="Save games" HorizontalAlignment="Left" VerticalAlignment="Top" Width="497" Height="27" />
+
+            <Label Content="Shared folder" HorizontalAlignment="Left" VerticalAlignment="Top" Height="27"/>
+            <TextBox Name="SharedDirTextBox" IsReadOnly="True" HorizontalAlignment="Left" Width="425" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" />
+            <Button Name="SharedDirBrowseButton" Content="Browse" Margin="5,0" Width="50" Height="23" Click="BrowseButton_Click" />
+
+            <Label Content="Direction" HorizontalAlignment="Left" VerticalAlignment="Top" Width="425" Height="27"/>
+            <RadioButton Margin="0,0" GroupName="DirectionRadioGroup" Name="FromSaveRadio" IsChecked="True" Click="DirectionRadio_Click">
+                Export from save folder to shared
+            </RadioButton>
+            <RadioButton Margin="10,0" GroupName="DirectionRadioGroup" Name="ToSaveRadio" Click="DirectionRadio_Click">
+                Import from shared to save folder
+            </RadioButton>
+
+            <Label Margin="0,10" Content="Save games" HorizontalAlignment="Left" VerticalAlignment="Top" Width="400" Height="27" />
             <StackPanel>
                 <ComboBox Width="480" Name="cmbSaves">
                     <ComboBox.ItemTemplate>
@@ -22,22 +35,20 @@
                                     <ColumnDefinition Width="350" />
                                     <ColumnDefinition Width="100" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{Binding PrettyName}" FontSize="12"/>
+                                <TextBlock Text="{Binding Name}" FontSize="12"/>
                                 <TextBlock Grid.Column="1" Text="{Binding DateTimeString}" FontSize="10" Margin="10,0" />
                             </Grid>
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
             </StackPanel>
-            <Label Content="Destination folder" HorizontalAlignment="Left" VerticalAlignment="Top" Height="27"/>
-            <TextBox Name="DestDirTextBox" IsReadOnly="True" HorizontalAlignment="Left" Width="425" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" />
-            <Button Name="DestDirBrowseButton" Content="Browse" Margin="5,0" Width="50" Height="23" Click="BrowseButton_Click" />
+
             <Button
-                Content="Export"
-                Margin="0,10"
+                Content="Transfer"
+                Margin="0,30"
                 VerticalAlignment="Top"
                 Width="75"
-                Click="ExportButton_Click" />
+                Click="TransferButton_Click" />
         </WrapPanel>
     </Grid>
 </Window>

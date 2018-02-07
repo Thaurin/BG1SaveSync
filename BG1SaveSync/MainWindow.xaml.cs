@@ -21,17 +21,25 @@ namespace BG1SaveSync
     public class SaveGame
     {
         public string FullName { get; set; }
-        public string PrettyName => FullName.Substring(FullName.LastIndexOf('\\') + 11);
+        public string Name { get; set; }
         public DateTime Date;
         public string DateTimeString => $"{Date.ToShortDateString()} {Date.ToShortTimeString()}";
 
         public SaveGame(DirectoryInfo dirInfo)
         {
             FullName = dirInfo.Name;
+            Name = FullName.Substring(FullName.LastIndexOf('\\') + 11);
             Date = dirInfo.CreationTime;
         }
 
-        public static List<SaveGame> GetSaveGamesFromDirectory(string directory)
+        public SaveGame(FileInfo fileInfo)
+        {
+            FullName = fileInfo.Name;
+            Name = FullName.Substring(0, FullName.Length - ".bg1save".Length);
+            Date = fileInfo.LastWriteTime;
+        }
+
+        public static List<SaveGame> GetSaveGamesFromSaveGameDirectory(string directory)
         {
             if (Directory.Exists(directory))
             {
@@ -40,6 +48,25 @@ namespace BG1SaveSync
                 foreach (DirectoryInfo dirInfo in saveDirs)
                 {
                     saveGameList.Add(new SaveGame(dirInfo));
+                }
+
+                return saveGameList;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static List<SaveGame> GetSaveGamesFromSharedDirectory(string directory)
+        {
+            if (Directory.Exists(directory))
+            {
+                List<SaveGame> saveGameList = new List<SaveGame>();
+                FileInfo[] saveFiles = new DirectoryInfo(directory).GetFiles("*.bg1save").OrderByDescending(p => p.CreationTime).ToArray();
+                foreach (FileInfo file in saveFiles)
+                {
+                    saveGameList.Add(new SaveGame(file));
                 }
 
                 return saveGameList;
@@ -61,8 +88,8 @@ namespace BG1SaveSync
             InitializeComponent();
             string myDocuments = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             SaveDirTextBox.Text = $"{myDocuments}\\Baldur's Gate - Enhanced Edition\\save";
-            DestDirTextBox.Text = myDocuments.Substring(0, myDocuments.LastIndexOf("\\")) + "\\Dropbox\\Saves\\BG1";
-            cmbSaves.ItemsSource = SaveGame.GetSaveGamesFromDirectory(SaveDirTextBox.Text);
+            SharedDirTextBox.Text = myDocuments.Substring(0, myDocuments.LastIndexOf("\\")) + "\\Dropbox\\Saves\\BG1";
+            cmbSaves.ItemsSource = SaveGame.GetSaveGamesFromSaveGameDirectory(SaveDirTextBox.Text);
             cmbSaves.SelectedIndex = 0;
         }
 
@@ -71,7 +98,7 @@ namespace BG1SaveSync
             Button senderTextBox = (Button)sender;
             var fbd = new System.Windows.Forms.FolderBrowserDialog()
             {
-                SelectedPath = senderTextBox.Name == "SaveDirBrowseButton" ? SaveDirTextBox.Text : DestDirTextBox.Text
+                SelectedPath = senderTextBox.Name == "SaveDirBrowseButton" ? SaveDirTextBox.Text : SharedDirTextBox.Text
             };
 
             using (fbd)
@@ -82,40 +109,86 @@ namespace BG1SaveSync
                     if (senderTextBox.Name == "SaveDirBrowseButton")
                     {
                         SaveDirTextBox.Text = fbd.SelectedPath;
-                        cmbSaves.ItemsSource = SaveGame.GetSaveGamesFromDirectory(SaveDirTextBox.Text);
+                        cmbSaves.ItemsSource = SaveGame.GetSaveGamesFromSaveGameDirectory(SaveDirTextBox.Text);
                         cmbSaves.SelectedIndex = 0;
                     }
                     else
                     {
-                        DestDirTextBox.Text = fbd.SelectedPath;
+                        SharedDirTextBox.Text = fbd.SelectedPath;
                     }
                 }
             }
         }
 
-        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        private void DirectionRadio_Click(object sender, RoutedEventArgs e)
+        {
+            RadioButton radioButton = (RadioButton)sender;
+            if (radioButton.Name == "FromSaveRadio")
+            {
+                cmbSaves.ItemsSource = SaveGame.GetSaveGamesFromSaveGameDirectory(SaveDirTextBox.Text);
+                cmbSaves.SelectedIndex = 0;
+            }
+            else
+            {
+                cmbSaves.ItemsSource = SaveGame.GetSaveGamesFromSharedDirectory(SharedDirTextBox.Text);
+                cmbSaves.SelectedIndex = 0;
+            }
+        }
+
+        private void TransferButton_Click(object sender, RoutedEventArgs e)
         {
             if (cmbSaves.Items.Count == 0)
             {
-                MessageBox.Show("No save games in save folder!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("No save games found!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             SaveGame selectedSaveGame = (SaveGame)cmbSaves.SelectedValue;
-            string saveDir = $"{SaveDirTextBox.Text}\\{selectedSaveGame.FullName}";
-            string destFile = $"{DestDirTextBox.Text}\\{selectedSaveGame.PrettyName}.bg1save";
+            string saveDir, saveFile;
 
-            try
+            if (FromSaveRadio.IsChecked == true)
             {
-                ZipFile.CreateFromDirectory(saveDir, destFile);
+                saveDir = $"{SaveDirTextBox.Text}\\{selectedSaveGame.FullName}";
+                saveFile = $"{SharedDirTextBox.Text}\\{selectedSaveGame.Name}.bg1save";
+
+                try
+                {
+                    ZipFile.CreateFromDirectory(saveDir, saveFile);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show($"Save game has been exported to {saveFile}.", "Success!", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                saveDir = $"{SaveDirTextBox.Text}\\000000000-{selectedSaveGame.Name}";
+                saveFile = $"{SharedDirTextBox.Text}\\{selectedSaveGame.FullName}";
+
+                if (Directory.Exists(saveDir))
+                {
+                    MessageBox.Show($"Save {selectedSaveGame.Name} already exists!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                Directory.CreateDirectory(saveDir);
+
+                try
+                {
+                    ZipFile.ExtractToDirectory(saveFile, saveDir);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show($"Save game has been imported to {saveDir}.", "Success!", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
-            MessageBox.Show($"Save game has been exported to {destFile}.", "Success!", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }
