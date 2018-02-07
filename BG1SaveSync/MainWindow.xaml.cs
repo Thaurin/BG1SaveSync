@@ -89,7 +89,14 @@ namespace BG1SaveSync
             string myDocuments = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             SaveDirTextBox.Text = $"{myDocuments}\\Baldur's Gate - Enhanced Edition\\save";
             SharedDirTextBox.Text = myDocuments.Substring(0, myDocuments.LastIndexOf("\\")) + "\\Dropbox\\Saves\\BG1";
-            cmbSaves.ItemsSource = SaveGame.GetSaveGamesFromSaveGameDirectory(SaveDirTextBox.Text);
+            RescanSaveGames();
+        }
+
+        private void RescanSaveGames()
+        {
+            cmbSaves.ItemsSource = FromSaveRadio.IsChecked == true ?
+                SaveGame.GetSaveGamesFromSaveGameDirectory(SaveDirTextBox.Text) :
+                SaveGame.GetSaveGamesFromSharedDirectory(SharedDirTextBox.Text);
             cmbSaves.SelectedIndex = 0;
         }
 
@@ -109,24 +116,20 @@ namespace BG1SaveSync
                     if (senderTextBox.Name == "SaveDirBrowseButton")
                     {
                         SaveDirTextBox.Text = fbd.SelectedPath;
-                        cmbSaves.ItemsSource = SaveGame.GetSaveGamesFromSaveGameDirectory(SaveDirTextBox.Text);
-                        cmbSaves.SelectedIndex = 0;
                     }
                     else
                     {
                         SharedDirTextBox.Text = fbd.SelectedPath;
                     }
+
+                    RescanSaveGames();
                 }
             }
         }
 
         private void DirectionRadio_Click(object sender, RoutedEventArgs e)
         {
-            RadioButton radioButton = (RadioButton)sender;
-            cmbSaves.ItemsSource = radioButton.Name == "FromSaveRadio" ?
-                SaveGame.GetSaveGamesFromSaveGameDirectory(SaveDirTextBox.Text) :
-                SaveGame.GetSaveGamesFromSharedDirectory(SharedDirTextBox.Text);
-            cmbSaves.SelectedIndex = 0;
+            RescanSaveGames();
         }
 
         private void TransferButton_Click(object sender, RoutedEventArgs e)
