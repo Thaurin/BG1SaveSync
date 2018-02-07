@@ -36,7 +36,7 @@ namespace BG1SaveSync
         {
             FullName = fileInfo.Name;
             Name = FullName.Substring(0, FullName.Length - ".bg1save".Length);
-            Date = fileInfo.LastWriteTime;
+            Date = fileInfo.CreationTime;
         }
 
         public static List<SaveGame> GetSaveGamesFromSaveGameDirectory(string directory)
@@ -152,14 +152,59 @@ namespace BG1SaveSync
             {
                 source = $"{SharedDirTextBox.Text}\\{selectedSaveGame.FullName}";
                 destination = $"{SaveDirTextBox.Text}\\000000000-{selectedSaveGame.Name}";
+            }
 
-                if (Directory.Exists(destination))
+            bool destinationExists = FromSaveRadio.IsChecked == true ? File.Exists(destination) : Directory.Exists(destination);
+            if (destinationExists)
+            {
+                string destinationBase = destination.Substring(destination.LastIndexOf("\\") + 1);
+
+                MessageBoxResult result = MessageBox.Show(
+                    $"Save {destinationBase} already exists! Replace with selected save? (a backup will be saved in the shared folder)",
+                    "Save already exists", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                switch (result)
                 {
-                    MessageBox.Show($"Save {selectedSaveGame.Name} already exists!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
+                    case MessageBoxResult.Yes:
+                        const int maxBackupFiles = 10;
+                        int i = 1;
+                        bool moved = false;
+                        while (i <= maxBackupFiles && moved == false)
+                        {
+                            string backupLocation = $"{SharedDirTextBox.Text}\\{destinationBase}.backup-{i++}";
+                            bool backupExists = FromSaveRadio.IsChecked == true ? File.Exists(backupLocation) : Directory.Exists(backupLocation);
+                            if (!backupExists)
+                            {
+                                try
+                                {
+                                    if (FromSaveRadio.IsChecked == true)
+                                    {
+                                        File.Move(destination, backupLocation);
+                                    }
+                                    else
+                                    {
+                                        Directory.Move(destination, backupLocation);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                                    return;
+                                }
 
-                Directory.CreateDirectory(destination);
+                                moved = true;
+                            }
+                        }
+
+                        if (moved == false)
+                        {
+                            MessageBox.Show("Backup of save game failed (too many backup files). Aborted. ", "Aborted!", MessageBoxButton.OK, MessageBoxImage.Information);
+                            return;
+                        }
+                        break;
+                    case MessageBoxResult.No:
+                        MessageBox.Show("Transfer cancelled.", "Aborted!", MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
+                }
             }
 
             try
@@ -170,6 +215,7 @@ namespace BG1SaveSync
                 }
                 else
                 {
+                    Directory.CreateDirectory(destination);
                     ZipFile.ExtractToDirectory(source, destination);
                 }
             }
@@ -179,7 +225,7 @@ namespace BG1SaveSync
                 return;
             }
 
-            MessageBox.Show($"Save game has been exported to {destination}.", "Success!", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show($"Save game has been transfered to {destination}.", "Success!", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }
