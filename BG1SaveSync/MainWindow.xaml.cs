@@ -123,16 +123,10 @@ namespace BG1SaveSync
         private void DirectionRadio_Click(object sender, RoutedEventArgs e)
         {
             RadioButton radioButton = (RadioButton)sender;
-            if (radioButton.Name == "FromSaveRadio")
-            {
-                cmbSaves.ItemsSource = SaveGame.GetSaveGamesFromSaveGameDirectory(SaveDirTextBox.Text);
-                cmbSaves.SelectedIndex = 0;
-            }
-            else
-            {
-                cmbSaves.ItemsSource = SaveGame.GetSaveGamesFromSharedDirectory(SharedDirTextBox.Text);
-                cmbSaves.SelectedIndex = 0;
-            }
+            cmbSaves.ItemsSource = radioButton.Name == "FromSaveRadio" ?
+                SaveGame.GetSaveGamesFromSaveGameDirectory(SaveDirTextBox.Text) :
+                SaveGame.GetSaveGamesFromSharedDirectory(SharedDirTextBox.Text);
+            cmbSaves.SelectedIndex = 0;
         }
 
         private void TransferButton_Click(object sender, RoutedEventArgs e)
@@ -144,51 +138,45 @@ namespace BG1SaveSync
             }
 
             SaveGame selectedSaveGame = (SaveGame)cmbSaves.SelectedValue;
-            string saveDir, saveFile;
+            string source, destination;
 
             if (FromSaveRadio.IsChecked == true)
             {
-                saveDir = $"{SaveDirTextBox.Text}\\{selectedSaveGame.FullName}";
-                saveFile = $"{SharedDirTextBox.Text}\\{selectedSaveGame.Name}.bg1save";
-
-                try
-                {
-                    ZipFile.CreateFromDirectory(saveDir, saveFile);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                MessageBox.Show($"Save game has been exported to {saveFile}.", "Success!", MessageBoxButton.OK, MessageBoxImage.Information);
+                source = $"{SaveDirTextBox.Text}\\{selectedSaveGame.FullName}";
+                destination = $"{SharedDirTextBox.Text}\\{selectedSaveGame.Name}.bg1save";
             }
             else
             {
-                saveDir = $"{SaveDirTextBox.Text}\\000000000-{selectedSaveGame.Name}";
-                saveFile = $"{SharedDirTextBox.Text}\\{selectedSaveGame.FullName}";
+                source = $"{SharedDirTextBox.Text}\\{selectedSaveGame.FullName}";
+                destination = $"{SaveDirTextBox.Text}\\000000000-{selectedSaveGame.Name}";
 
-                if (Directory.Exists(saveDir))
+                if (Directory.Exists(destination))
                 {
                     MessageBox.Show($"Save {selectedSaveGame.Name} already exists!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                Directory.CreateDirectory(saveDir);
-
-                try
-                {
-                    ZipFile.ExtractToDirectory(saveFile, saveDir);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                MessageBox.Show($"Save game has been imported to {saveDir}.", "Success!", MessageBoxButton.OK, MessageBoxImage.Information);
+                Directory.CreateDirectory(destination);
             }
 
+            try
+            {
+                if (FromSaveRadio.IsChecked == true)
+                {
+                    ZipFile.CreateFromDirectory(source, destination);
+                }
+                else
+                {
+                    ZipFile.ExtractToDirectory(source, destination);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            MessageBox.Show($"Save game has been exported to {destination}.", "Success!", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 }
