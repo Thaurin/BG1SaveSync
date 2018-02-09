@@ -16,6 +16,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using BG1SaveSync.Classes;
+
 namespace BG1SaveSync
 {
     public class SaveGame
@@ -85,6 +87,13 @@ namespace BG1SaveSync
     {
         public MainWindow()
         {
+            AppFolder appFolder = new AppFolder();
+            if (!appFolder.Initialize())
+            {
+                MessageBox.Show(appFolder.LastError, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             InitializeComponent();
             string myDocuments = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             SaveDirTextBox.Text = $"{myDocuments}\\Baldur's Gate - Enhanced Edition\\save";
