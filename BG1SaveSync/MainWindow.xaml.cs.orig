@@ -20,6 +20,66 @@ using BG1SaveSync.Classes;
 
 namespace BG1SaveSync
 {
+    public class SaveGame
+    {
+        public string FullName { get; set; }
+        public string Name { get; set; }
+        public DateTime Date;
+        public string DateTimeString => $"{Date.ToShortDateString()} {Date.ToShortTimeString()}";
+
+        public SaveGame(DirectoryInfo dirInfo)
+        {
+            FullName = dirInfo.Name;
+            Name = FullName.Substring(FullName.LastIndexOf('\\') + 11);
+            Date = dirInfo.CreationTime;
+        }
+
+        public SaveGame(FileInfo fileInfo)
+        {
+            FullName = fileInfo.Name;
+            Name = FullName.Substring(0, FullName.Length - ".bg1save".Length);
+            Date = fileInfo.CreationTime;
+        }
+
+        public static List<SaveGame> GetSaveGamesFromSaveGameDirectory(string directory)
+        {
+            if (Directory.Exists(directory))
+            {
+                List<SaveGame> saveGameList = new List<SaveGame>();
+                DirectoryInfo[] saveDirs = new DirectoryInfo(directory).GetDirectories().OrderByDescending(p => p.CreationTime).ToArray();
+                foreach (DirectoryInfo dirInfo in saveDirs)
+                {
+                    saveGameList.Add(new SaveGame(dirInfo));
+                }
+
+                return saveGameList;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static List<SaveGame> GetSaveGamesFromSharedDirectory(string directory)
+        {
+            if (Directory.Exists(directory))
+            {
+                List<SaveGame> saveGameList = new List<SaveGame>();
+                FileInfo[] saveFiles = new DirectoryInfo(directory).GetFiles("*.bg1save").OrderByDescending(p => p.CreationTime).ToArray();
+                foreach (FileInfo file in saveFiles)
+                {
+                    saveGameList.Add(new SaveGame(file));
+                }
+
+                return saveGameList;
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -37,9 +97,16 @@ namespace BG1SaveSync
             }
 
             InitializeComponent();
+<<<<<<< HEAD
             SaveDirTextBox.Text = appFolder.Config["SaveGameFolder"];
             SharedDirTextBox.Text = appFolder.Config["SharedFolder"];
+            RescanSaveGames();
+=======
+            string myDocuments = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            SaveDirTextBox.Text = $"{myDocuments}\\Baldur's Gate - Enhanced Edition\\save";
+            SharedDirTextBox.Text = myDocuments.Substring(0, myDocuments.LastIndexOf("\\")) + "\\Dropbox\\Saves\\BG1";
             RescanSaveFolder();
+>>>>>>> Add thumbnails for save game folder save games
         }
 
         private void RescanSaveFolder()
@@ -54,95 +121,47 @@ namespace BG1SaveSync
         {
             if (cmbSaves.SelectedValue != null)
             {
-                string saveGameLocation;
                 SaveGame selectedSaveGame = (SaveGame)cmbSaves.SelectedValue;
-
-                ImagePanel.Children.Clear();
 
                 if (FromSaveRadio.IsChecked == true)
                 {
-                    saveGameLocation = $"{SaveDirTextBox.Text}\\{selectedSaveGame.FullName}";
-                }
-                else
-                {
-                    saveGameLocation = $"{appFolder.TempFolderLocation}\\{selectedSaveGame.FullName}";
+                    ImagePanel.Children.Clear();
 
-                    // Make sure that there is no trash lying around
-                    if (Directory.Exists(saveGameLocation))
+                    string screenShotFileName = $"{SaveDirTextBox.Text}\\{selectedSaveGame.FullName}\\BALDUR.bmp";
+                    if (File.Exists(screenShotFileName))
                     {
-                        try
-                        {
-                            Directory.Delete(saveGameLocation, recursive: true);
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-                    }
-
-                    Directory.CreateDirectory(saveGameLocation);
-                    ZipFile.ExtractToDirectory($"{SharedDirTextBox.Text}\\{selectedSaveGame.FullName}", saveGameLocation);
-                }
-
-                // Screenshot
-                string screenShotFileName = $"{saveGameLocation}\\BALDUR.bmp";
-                if (File.Exists(screenShotFileName))
-                {
-                    BitmapImage bmImage = new BitmapImage();
-                    bmImage.BeginInit();
-                    bmImage.UriSource = new Uri(screenShotFileName);
-                    bmImage.CacheOption = BitmapCacheOption.OnLoad;
-                    bmImage.EndInit();
-
-                    ImagePanel.Children.Add(new Image
-                    {
-                        Source = bmImage,
-                        Margin = new Thickness(0, 0, 15, 0),
-                        Stretch = Stretch.None
-                    });
-                }
-
-                // Portraits
-                int i = -1;
-                bool fileExists = true; // Assume the existence of the first portrait
-                while (i++ < 6 && fileExists == true)
-                {
-                    string fileName = $"{saveGameLocation}\\PORTRT{i}.bmp";
-                    fileExists = File.Exists(fileName);
-
-                    if (fileExists)
-                    {
-                        BitmapImage bmImage = new BitmapImage();
-                        bmImage.BeginInit();
-                        bmImage.UriSource = new Uri(fileName);
-                        bmImage.CacheOption = BitmapCacheOption.OnLoad;
-                        bmImage.EndInit();
-
                         ImagePanel.Children.Add(new Image
                         {
-                            Source = bmImage,
-                            Margin = new Thickness(0, 0, 5, 0),
+                            Source = new BitmapImage(new Uri(screenShotFileName)),
+                            Margin = new Thickness(0, 0, 15, 0),
                             Stretch = Stretch.None
                         });
                     }
-                }
 
-                // Clean up
-                if (FromSaveRadio.IsChecked != true)
-                {
-                    if (Directory.Exists(saveGameLocation))
+                    int i = -1;
+                    bool fileExists = true; // Assume the existence of the first portrait
+                    while (i++ < 6 && fileExists == true)
                     {
-                        try
+                        string fileName = $"{SaveDirTextBox.Text}\\{selectedSaveGame.FullName}\\PORTRT{i}.bmp";
+                        fileExists = File.Exists(fileName);
+
+                        if (fileExists)
                         {
-                            Directory.Delete(saveGameLocation, recursive: true);
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
+                            ImageSource imageSource = new BitmapImage(new Uri(fileName));
+                            ImagePanel.Children.Add(new Image
+                            {
+                                Source = imageSource,
+                                Margin = new Thickness(0, 0, 5, 0),
+                                Stretch = Stretch.None
+                            });
                         }
                     }
+                }
+                else
+                {
+                    ImagePanel.Children.Clear();
+                    
+                    // TODO
                 }
             }
         }
@@ -171,8 +190,12 @@ namespace BG1SaveSync
                         appFolder.Config["SharedFolder"] = fbd.SelectedPath;
                     }
 
+<<<<<<< HEAD
                     appFolder.WriteConfig();
+                    RescanSaveGames();
+=======
                     RescanSaveFolder();
+>>>>>>> Add thumbnails for save game folder save games
                 }
             }
         }
