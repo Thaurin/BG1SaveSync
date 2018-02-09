@@ -57,6 +57,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Classes\AppFolder.cs" />
+    <Compile Include="Classes\SaveGame.cs" />
     <Compile Include="System\WindowsMessageBox.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
