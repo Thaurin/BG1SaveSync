@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BG1SaveSync"
         mc:Ignorable="d"
-        Title="BG1SaveSync" Width="596" Height="450"
+        Title="BG1SaveSync" Width="596" Height="440"
         ResizeMode="CanMinimize">
     <StackPanel Orientation="Vertical" Margin="10,0" HorizontalAlignment="Center" VerticalAlignment="Top">
         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
@@ -60,12 +60,12 @@
             <WrapPanel Margin="0,10" Name="ImagePanel"></WrapPanel>
         </StackPanel>
 
-        <StackPanel Orientation="Horizontal" Margin="0,10">
+        <DockPanel Width="530">
             <Button
-                    Content="Transfer"
-                    VerticalAlignment="Top"
-                    Width="75"
-                    Click="TransferButton_Click" />
-        </StackPanel>
+                Content="Transfer"
+                HorizontalAlignment="Right"
+                Width="75"
+                Click="TransferButton_Click" />
+        </DockPanel>
     </StackPanel>
 </Window>
