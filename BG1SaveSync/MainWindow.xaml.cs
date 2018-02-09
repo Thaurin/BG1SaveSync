@@ -57,15 +57,6 @@ namespace BG1SaveSync
                 string saveGameLocation;
                 SaveGame selectedSaveGame = (SaveGame)cmbSaves.SelectedValue;
 
-                //foreach (UIElement element in ImagePanel.Children)
-                //{
-                //    if (element.GetType() == typeof(Image))
-                //    {
-                //        ((Image)element).Source = null;
-                //    }
-                //}
-                //GC.Collect();
-
                 ImagePanel.Children.Clear();
 
                 if (FromSaveRadio.IsChecked == true)
@@ -76,6 +67,7 @@ namespace BG1SaveSync
                 {
                     saveGameLocation = $"{appFolder.TempFolderLocation}\\{selectedSaveGame.FullName}";
 
+                    // Make sure that there is no trash lying around
                     if (Directory.Exists(saveGameLocation))
                     {
                         try
@@ -93,17 +85,25 @@ namespace BG1SaveSync
                     ZipFile.ExtractToDirectory($"{SharedDirTextBox.Text}\\{selectedSaveGame.FullName}", saveGameLocation);
                 }
 
+                // Screenshot
                 string screenShotFileName = $"{saveGameLocation}\\BALDUR.bmp";
                 if (File.Exists(screenShotFileName))
                 {
+                    BitmapImage bmImage = new BitmapImage();
+                    bmImage.BeginInit();
+                    bmImage.UriSource = new Uri(screenShotFileName);
+                    bmImage.CacheOption = BitmapCacheOption.OnLoad;
+                    bmImage.EndInit();
+
                     ImagePanel.Children.Add(new Image
                     {
-                        Source = new BitmapImage(new Uri(screenShotFileName)),
+                        Source = bmImage,
                         Margin = new Thickness(0, 0, 15, 0),
                         Stretch = Stretch.None
                     });
                 }
 
+                // Portraits
                 int i = -1;
                 bool fileExists = true; // Assume the existence of the first portrait
                 while (i++ < 6 && fileExists == true)
@@ -113,13 +113,35 @@ namespace BG1SaveSync
 
                     if (fileExists)
                     {
-                        ImageSource imageSource = new BitmapImage(new Uri(fileName));
+                        BitmapImage bmImage = new BitmapImage();
+                        bmImage.BeginInit();
+                        bmImage.UriSource = new Uri(fileName);
+                        bmImage.CacheOption = BitmapCacheOption.OnLoad;
+                        bmImage.EndInit();
+
                         ImagePanel.Children.Add(new Image
                         {
-                            Source = imageSource,
+                            Source = bmImage,
                             Margin = new Thickness(0, 0, 5, 0),
                             Stretch = Stretch.None
                         });
+                    }
+                }
+
+                // Clean up
+                if (FromSaveRadio.IsChecked != true)
+                {
+                    if (Directory.Exists(saveGameLocation))
+                    {
+                        try
+                        {
+                            Directory.Delete(saveGameLocation, recursive: true);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
                     }
                 }
             }
