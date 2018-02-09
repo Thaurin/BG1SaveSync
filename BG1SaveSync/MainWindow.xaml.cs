@@ -33,6 +33,7 @@ namespace BG1SaveSync
             if (!appFolder.Initialize())
             {
                 MessageBox.Show(appFolder.LastError, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Application.Current.Shutdown();
                 return;
             }
 
