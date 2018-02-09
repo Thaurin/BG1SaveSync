@@ -39,7 +39,7 @@ namespace BG1SaveSync
             InitializeComponent();
             SaveDirTextBox.Text = appFolder.Config["SaveGameFolder"];
             SharedDirTextBox.Text = appFolder.Config["SharedFolder"];
-            RescanSaveGames();
+            RescanSaveFolder();
         }
 
         private void RescanSaveFolder()
@@ -54,47 +54,73 @@ namespace BG1SaveSync
         {
             if (cmbSaves.SelectedValue != null)
             {
+                string saveGameLocation;
                 SaveGame selectedSaveGame = (SaveGame)cmbSaves.SelectedValue;
+
+                //foreach (UIElement element in ImagePanel.Children)
+                //{
+                //    if (element.GetType() == typeof(Image))
+                //    {
+                //        ((Image)element).Source = null;
+                //    }
+                //}
+                //GC.Collect();
+
+                ImagePanel.Children.Clear();
 
                 if (FromSaveRadio.IsChecked == true)
                 {
-                    ImagePanel.Children.Clear();
-
-                    string screenShotFileName = $"{SaveDirTextBox.Text}\\{selectedSaveGame.FullName}\\BALDUR.bmp";
-                    if (File.Exists(screenShotFileName))
-                    {
-                        ImagePanel.Children.Add(new Image
-                        {
-                            Source = new BitmapImage(new Uri(screenShotFileName)),
-                            Margin = new Thickness(0, 0, 15, 0),
-                            Stretch = Stretch.None
-                        });
-                    }
-
-                    int i = -1;
-                    bool fileExists = true; // Assume the existence of the first portrait
-                    while (i++ < 6 && fileExists == true)
-                    {
-                        string fileName = $"{SaveDirTextBox.Text}\\{selectedSaveGame.FullName}\\PORTRT{i}.bmp";
-                        fileExists = File.Exists(fileName);
-
-                        if (fileExists)
-                        {
-                            ImageSource imageSource = new BitmapImage(new Uri(fileName));
-                            ImagePanel.Children.Add(new Image
-                            {
-                                Source = imageSource,
-                                Margin = new Thickness(0, 0, 5, 0),
-                                Stretch = Stretch.None
-                            });
-                        }
-                    }
+                    saveGameLocation = $"{SaveDirTextBox.Text}\\{selectedSaveGame.FullName}";
                 }
                 else
                 {
-                    ImagePanel.Children.Clear();
-                    
-                    // TODO
+                    saveGameLocation = $"{appFolder.TempFolderLocation}\\{selectedSaveGame.FullName}";
+
+                    if (Directory.Exists(saveGameLocation))
+                    {
+                        try
+                        {
+                            Directory.Delete(saveGameLocation, recursive: true);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
+                    }
+
+                    Directory.CreateDirectory(saveGameLocation);
+                    ZipFile.ExtractToDirectory($"{SharedDirTextBox.Text}\\{selectedSaveGame.FullName}", saveGameLocation);
+                }
+
+                string screenShotFileName = $"{saveGameLocation}\\BALDUR.bmp";
+                if (File.Exists(screenShotFileName))
+                {
+                    ImagePanel.Children.Add(new Image
+                    {
+                        Source = new BitmapImage(new Uri(screenShotFileName)),
+                        Margin = new Thickness(0, 0, 15, 0),
+                        Stretch = Stretch.None
+                    });
+                }
+
+                int i = -1;
+                bool fileExists = true; // Assume the existence of the first portrait
+                while (i++ < 6 && fileExists == true)
+                {
+                    string fileName = $"{saveGameLocation}\\PORTRT{i}.bmp";
+                    fileExists = File.Exists(fileName);
+
+                    if (fileExists)
+                    {
+                        ImageSource imageSource = new BitmapImage(new Uri(fileName));
+                        ImagePanel.Children.Add(new Image
+                        {
+                            Source = imageSource,
+                            Margin = new Thickness(0, 0, 5, 0),
+                            Stretch = Stretch.None
+                        });
+                    }
                 }
             }
         }
@@ -124,7 +150,7 @@ namespace BG1SaveSync
                     }
 
                     appFolder.WriteConfig();
-                    RescanSaveGames();
+                    RescanSaveFolder();
                 }
             }
         }
