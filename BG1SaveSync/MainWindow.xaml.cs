@@ -16,6 +16,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using BG1SaveSync.Classes;
+
 namespace BG1SaveSync
 {
     public class SaveGame
@@ -83,12 +85,20 @@ namespace BG1SaveSync
     /// </summary>
     public partial class MainWindow : Window
     {
+        AppFolder appFolder;
+
         public MainWindow()
         {
+            appFolder = new AppFolder();
+            if (!appFolder.Initialize())
+            {
+                MessageBox.Show(appFolder.LastError, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             InitializeComponent();
-            string myDocuments = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            SaveDirTextBox.Text = $"{myDocuments}\\Baldur's Gate - Enhanced Edition\\save";
-            SharedDirTextBox.Text = myDocuments.Substring(0, myDocuments.LastIndexOf("\\")) + "\\Dropbox\\Saves\\BG1";
+            SaveDirTextBox.Text = appFolder.Config["SaveGameFolder"];
+            SharedDirTextBox.Text = appFolder.Config["SharedFolder"];
             RescanSaveGames();
         }
 
@@ -116,12 +126,15 @@ namespace BG1SaveSync
                     if (senderTextBox.Name == "SaveDirBrowseButton")
                     {
                         SaveDirTextBox.Text = fbd.SelectedPath;
+                        appFolder.Config["SaveGameFolder"] = fbd.SelectedPath;
                     }
                     else
                     {
                         SharedDirTextBox.Text = fbd.SelectedPath;
+                        appFolder.Config["SharedFolder"] = fbd.SelectedPath;
                     }
 
+                    appFolder.WriteConfig();
                     RescanSaveGames();
                 }
             }
@@ -165,7 +178,7 @@ namespace BG1SaveSync
                 switch (result)
                 {
                     case MessageBoxResult.Yes:
-                        const int maxBackupFiles = 10;
+                        int maxBackupFiles = Convert.ToInt16(appFolder.Config["MaxBackupFiles"]);
                         int i = 1;
                         bool moved = false;
                         while (i <= maxBackupFiles && moved == false)
