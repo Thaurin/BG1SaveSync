@@ -20,8 +20,47 @@ namespace BG1SaveSync.Classes
             string myDocuments = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             DefaultConfig = new Dictionary<string, string>();
             DefaultConfig.Add("SaveGameFolder", $"{myDocuments}\\Baldur's Gate - Enhanced Edition\\save");
-            DefaultConfig.Add("SharedFolder", myDocuments.Substring(0, myDocuments.LastIndexOf("\\")) + "\\Dropbox\\Saves\\BG1");
+            DefaultConfig.Add("SharedFolder", DetermineSharedPath());
             DefaultConfig.Add("MaxBackupFiles", "10");
+        }
+
+        private string DetermineSharedPath()
+        {
+            // Poor man's Json parser! No Json.NET or Regex! Yeah, okay. It's pretty shit code.
+
+            string dropboxPath = "";
+            string[] dropboxInfoJson = new string[]
+            {
+                $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Dropbox\\info.json",
+                $"{Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)}\\Dropbox\\info.json",
+                $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\Dropbox\\info.json"
+            };
+
+            foreach (string infoJsonFile in dropboxInfoJson)
+            {
+                if (File.Exists(infoJsonFile))
+                {
+                    string infoJSon = File.ReadAllText(
+                        $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Dropbox\\info.json");
+                    int pathKeyIndex = infoJSon.IndexOf("\"path\"");
+                    int pathStartIndex = infoJSon.IndexOf("\"", pathKeyIndex + 6);
+                    int pathEndIndex = infoJSon.IndexOf("\"", pathStartIndex + 1);
+                    dropboxPath = infoJSon.Substring(pathStartIndex + 1, pathEndIndex - pathStartIndex - 1);
+                    dropboxPath = dropboxPath.Replace(@"\\", @"\");
+
+                    if (!Directory.Exists(dropboxPath))
+                    {
+                        dropboxPath = "";
+                    }
+                }
+            }
+
+            string myDocuments = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+            dropboxPath = dropboxPath == "" ?
+                myDocuments.Substring(0, myDocuments.LastIndexOf("\\")) + "\\Dropbox\\Saves\\BG1" :
+                $"{dropboxPath}\\Saves\\BG1";
+
+            return dropboxPath;
         }
 
         public bool Initialize()
