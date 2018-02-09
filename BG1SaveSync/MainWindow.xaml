@@ -40,7 +40,7 @@
             <Label Content="Save games" HorizontalAlignment="Left" VerticalAlignment="Top" Height="27" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <ComboBox Name="cmbSaves" HorizontalAlignment="Stretch" SelectionChanged="cmbSaves_SelectionChanged">
+            <ComboBox Name="SavesCombo" HorizontalAlignment="Stretch" SelectionChanged="SavesCombo_SelectionChanged">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>

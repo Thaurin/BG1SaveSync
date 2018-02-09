@@ -45,18 +45,18 @@ namespace BG1SaveSync
 
         private void RescanSaveFolder()
         {
-            cmbSaves.ItemsSource = FromSaveRadio.IsChecked == true ?
+            SavesCombo.ItemsSource = FromSaveRadio.IsChecked == true ?
                 SaveGame.GetSaveGamesFromSaveGameDirectory(SaveDirTextBox.Text) :
                 SaveGame.GetSaveGamesFromSharedDirectory(SharedDirTextBox.Text);
-            cmbSaves.SelectedIndex = 0;
+            SavesCombo.SelectedIndex = 0;
         }
 
         private void RescanSelectedSaveGame()
         {
-            if (cmbSaves.SelectedValue != null)
+            if (SavesCombo.SelectedValue != null)
             {
                 string saveGameLocation;
-                SaveGame selectedSaveGame = (SaveGame)cmbSaves.SelectedValue;
+                SaveGame selectedSaveGame = (SaveGame)SavesCombo.SelectedValue;
 
                 ImagePanel.Children.Clear();
 
@@ -178,7 +178,7 @@ namespace BG1SaveSync
             }
         }
 
-        private void cmbSaves_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void SavesCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             RescanSelectedSaveGame();
         }
@@ -190,13 +190,13 @@ namespace BG1SaveSync
 
         private void TransferButton_Click(object sender, RoutedEventArgs e)
         {
-            if (cmbSaves.Items.Count == 0)
+            if (SavesCombo.Items.Count == 0)
             {
                 MessageBox.Show("No save games found!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            SaveGame selectedSaveGame = (SaveGame)cmbSaves.SelectedValue;
+            SaveGame selectedSaveGame = (SaveGame)SavesCombo.SelectedValue;
             string source, destination;
 
             if (FromSaveRadio.IsChecked == true)

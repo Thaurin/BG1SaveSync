@@ -18,10 +18,12 @@ namespace BG1SaveSync.Classes
         {
             AppFolderLocation = $"{Environment.GetFolderPath(Environment.SpecialFolder.Personal)}\\BG1SaveSync";
             string myDocuments = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-            DefaultConfig = new Dictionary<string, string>();
-            DefaultConfig.Add("SaveGameFolder", $"{myDocuments}\\Baldur's Gate - Enhanced Edition\\save");
-            DefaultConfig.Add("SharedFolder", DetermineSharedPath());
-            DefaultConfig.Add("MaxBackupFiles", "10");
+            DefaultConfig = new Dictionary<string, string>
+            {
+                { "SaveGameFolder", $"{myDocuments}\\Baldur's Gate - Enhanced Edition\\save" },
+                { "SharedFolder", DetermineSharedPath() },
+                { "MaxBackupFiles", "10" }
+            };
         }
 
         private string DetermineSharedPath()

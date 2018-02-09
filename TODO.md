@@ -6,6 +6,5 @@
 - Add icon, etc.
 - Add configuration tab
 - Add minimize to system tray, auto focus on exit game?
-- Get Dropbox directory from JSON file
 - Make issues of TODO list
 
