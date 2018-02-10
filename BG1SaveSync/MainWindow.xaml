@@ -46,10 +46,12 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="410" />
-                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="40" />
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="{Binding Name}" FontSize="12"/>
-                            <TextBlock Grid.Column="1" Text="{Binding DateTimeString}" FontSize="10" />
+                            <TextBlock Grid.Column="1" Text="{Binding DateString}" FontSize="10" />
+                            <TextBlock Grid.Column="2" Text="{Binding TimeString}" FontSize="10" />
                         </Grid>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>

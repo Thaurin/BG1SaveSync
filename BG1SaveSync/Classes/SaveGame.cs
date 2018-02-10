@@ -10,7 +10,8 @@ namespace BG1SaveSync.Classes
         public string FullName { get; set; }
         public string Name { get; set; }
         public DateTime Date;
-        public string DateTimeString => $"{Date.ToShortDateString()} {Date.ToShortTimeString()}";
+        public string DateString => $"{Date.ToShortDateString()}";
+        public string TimeString => $"{Date.ToShortTimeString()}";
 
         public SaveGame(DirectoryInfo dirInfo)
         {
