@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.IO;
 using System.IO.Compression;
@@ -25,7 +26,17 @@ namespace BG1SaveSync
     /// </summary>
     public partial class MainWindow : Window
     {
+        public delegate void ActivateCallBack();
         AppFolder appFolder;
+
+        protected override void OnStateChanged(EventArgs e)
+        {
+            if (WindowState == WindowState.Minimized)
+            {
+                this.Hide();
+            }
+            base.OnStateChanged(e);
+        }
 
         public MainWindow()
         {
@@ -37,10 +48,45 @@ namespace BG1SaveSync
                 return;
             }
 
+            // Handle system tray icon
+            System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
+            ni.Icon = new System.Drawing.Icon("3xhumed-Baldurs-Gate-1.ico");
+            ni.Visible = true;
+            ni.DoubleClick += delegate (object sender, EventArgs args)
+            {
+                if (WindowState == WindowState.Normal)
+                {
+                    WindowState = WindowState.Minimized;
+                }
+                else
+                {
+                    Show();
+                    WindowState = WindowState.Normal;
+                }
+            };
+
+            // Monitor game process
+            ProcessMonitor.MonitorForStart("notepad");
+            ProcessMonitor.ProcessClosed += new EventHandler(Game_Exited);
+
             InitializeComponent();
             SaveDirTextBox.Text = appFolder.Config["SaveGameFolder"];
             SharedDirTextBox.Text = appFolder.Config["SharedFolder"];
             RescanSaveFolder();
+        }
+
+        private void ActivateWindow()
+        {
+            MessageBox.Show("Program closed!");
+            ProcessMonitor.MonitorForStart("notepad");
+            WindowState = WindowState.Normal;
+            Show();
+            Activate();
+        }
+
+        private void Game_Exited(object sender, EventArgs e)
+        {
+            Dispatcher.Invoke(new ActivateCallBack(ActivateWindow));
         }
 
         private void RescanSaveFolder()
