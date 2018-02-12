@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace BG1SaveSync.Classes
 {
-    public static class ProcessMonitor
+    public class ProcessMonitor
     {
         public static event EventHandler ProcessClosed;
 
-        public static void MonitorForStart(string processName)
+        public static Thread MonitorForStart(string processName)
         {
             Thread thread = new Thread(() =>
             {
@@ -33,6 +33,7 @@ namespace BG1SaveSync.Classes
             });
 
             thread.Start();
+            return thread;
         }
 
         public static void MonitorForExit(Process process)

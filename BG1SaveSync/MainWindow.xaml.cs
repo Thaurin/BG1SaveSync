@@ -6,7 +6,6 @@ using System.Linq;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -18,6 +17,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 using BG1SaveSync.Classes;
+using System.ComponentModel;
+using System.Threading;
 
 namespace BG1SaveSync
 {
@@ -26,8 +27,10 @@ namespace BG1SaveSync
     /// </summary>
     public partial class MainWindow : Window
     {
+        private System.Windows.Forms.NotifyIcon notifyIcon;
+        private Thread monitoringThread;
         public delegate void ActivateCallBack();
-        AppFolder appFolder;
+        private AppFolder appFolder;
 
         protected override void OnStateChanged(EventArgs e)
         {
@@ -36,6 +39,14 @@ namespace BG1SaveSync
                 this.Hide();
             }
             base.OnStateChanged(e);
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            monitoringThread.Abort();
+            notifyIcon.Icon = null;
+            notifyIcon.Dispose();
+            base.OnClosing(e);
         }
 
         public MainWindow()
@@ -49,10 +60,10 @@ namespace BG1SaveSync
             }
 
             // Handle system tray icon
-            System.Windows.Forms.NotifyIcon ni = new System.Windows.Forms.NotifyIcon();
-            ni.Icon = new System.Drawing.Icon("3xhumed-Baldurs-Gate-1.ico");
-            ni.Visible = true;
-            ni.DoubleClick += delegate (object sender, EventArgs args)
+            notifyIcon = new System.Windows.Forms.NotifyIcon();
+            notifyIcon.Icon = new System.Drawing.Icon("3xhumed-Baldurs-Gate-1.ico");
+            notifyIcon.Visible = true;
+            notifyIcon.DoubleClick += delegate (object sender, EventArgs args)
             {
                 if (WindowState == WindowState.Normal)
                 {
@@ -66,7 +77,7 @@ namespace BG1SaveSync
             };
 
             // Monitor game process
-            ProcessMonitor.MonitorForStart("notepad");
+            monitoringThread = ProcessMonitor.MonitorForStart("notepad");
             ProcessMonitor.ProcessClosed += new EventHandler(Game_Exited);
 
             InitializeComponent();
