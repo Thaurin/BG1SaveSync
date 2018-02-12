@@ -19,6 +19,7 @@ using System.Windows.Shapes;
 using BG1SaveSync.Classes;
 using System.ComponentModel;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BG1SaveSync
 {
@@ -28,8 +29,6 @@ namespace BG1SaveSync
     public partial class MainWindow : Window
     {
         private System.Windows.Forms.NotifyIcon notifyIcon;
-        private Thread monitoringThread;
-        public delegate void ActivateCallBack();
         private AppFolder appFolder;
 
         protected override void OnStateChanged(EventArgs e)
@@ -43,7 +42,7 @@ namespace BG1SaveSync
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            monitoringThread.Abort();
+            //monitoringThread.Abort();
             notifyIcon.Icon = null;
             notifyIcon.Dispose();
             base.OnClosing(e);
@@ -61,7 +60,7 @@ namespace BG1SaveSync
 
             // Handle system tray icon
             notifyIcon = new System.Windows.Forms.NotifyIcon();
-            notifyIcon.Icon = new System.Drawing.Icon("3xhumed-Baldurs-Gate-1.ico");
+            notifyIcon.Icon = new System.Drawing.Icon("BG1SaveSync.ico");
             notifyIcon.Visible = true;
             notifyIcon.DoubleClick += delegate (object sender, EventArgs args)
             {
@@ -77,8 +76,19 @@ namespace BG1SaveSync
             };
 
             // Monitor game process
-            monitoringThread = ProcessMonitor.MonitorForStart("notepad");
-            ProcessMonitor.ProcessClosed += new EventHandler(Game_Exited);
+            var task = Task.Run(() =>
+            {
+                do
+                {
+                    Process[] processes = Process.GetProcessesByName("baldur");
+                    if (processes.Length > 0)
+                    {
+                        processes[0].WaitForExit();
+                        Dispatcher.Invoke((Action)(() => BrintToFront()));
+                    }
+                    Thread.Sleep(10000);
+                } while (true);
+            });
 
             InitializeComponent();
             SaveDirTextBox.Text = appFolder.Config["SaveGameFolder"];
@@ -86,18 +96,22 @@ namespace BG1SaveSync
             RescanSaveFolder();
         }
 
-        private void ActivateWindow()
+        private void BrintToFront()
         {
-            MessageBox.Show("Program closed!");
-            ProcessMonitor.MonitorForStart("notepad");
-            WindowState = WindowState.Normal;
-            Show();
-            Activate();
-        }
+            if (!IsVisible)
+            {
+                Show();
+            }
 
-        private void Game_Exited(object sender, EventArgs e)
-        {
-            Dispatcher.Invoke(new ActivateCallBack(ActivateWindow));
+            if (WindowState == WindowState.Minimized)
+            {
+                WindowState = WindowState.Normal;
+            }
+
+            Activate();
+            Topmost = true;
+            Topmost = false;
+            Focus();
         }
 
         private void RescanSaveFolder()

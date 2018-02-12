@@ -35,7 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>3xhumed-Baldurs-Gate-1.ico</ApplicationIcon>
+    <ApplicationIcon>BG1SaveSync.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>BG1SaveSync.App</StartupObject>
@@ -66,7 +66,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="Classes\AppFolder.cs" />
-    <Compile Include="Classes\ProcessMonitor.cs" />
     <Compile Include="Classes\SaveGame.cs" />
     <Compile Include="Classes\SingleInstance.cs" />
     <Compile Include="System\WindowsMessageBox.cs" />
@@ -110,7 +109,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="3xhumed-Baldurs-Gate-1.ico">
+    <Content Include="BG1SaveSync.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

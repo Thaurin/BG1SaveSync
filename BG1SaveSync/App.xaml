@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:BG1SaveSync"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <Image x:Key="AppIcon" Source="BG1SaveSync.ico" />
     </Application.Resources>
 </Application>

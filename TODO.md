@@ -3,6 +3,5 @@
 - Support other Infinity Engine Enhanced Edition games (BG2, IWD)
 - Implement a Model-View-ViewModel pattern
 - It may be better to preserve prefix number in saves (0000000-Name)
-- Add minimize to system tray, auto focus on exit game?
 - Make issues of TODO list
 
