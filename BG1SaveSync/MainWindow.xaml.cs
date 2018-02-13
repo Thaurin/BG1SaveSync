@@ -42,10 +42,14 @@ namespace BG1SaveSync
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            //monitoringThread.Abort();
             notifyIcon.Icon = null;
             notifyIcon.Dispose();
             base.OnClosing(e);
+        }
+
+        private void ContextMenuExit_Click(object Sender, EventArgs e)
+        {
+            Application.Current.Shutdown();
         }
 
         public MainWindow()
@@ -59,9 +63,15 @@ namespace BG1SaveSync
             }
 
             // Handle system tray icon
+            System.Windows.Forms.ContextMenu contextMenu = new System.Windows.Forms.ContextMenu();
+            System.Windows.Forms.MenuItem menuItem = new System.Windows.Forms.MenuItem { Text = "Exit", Index = 0 };
+            menuItem.Click += new EventHandler(ContextMenuExit_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
             notifyIcon = new System.Windows.Forms.NotifyIcon();
             notifyIcon.Icon = new System.Drawing.Icon("BG1SaveSync.ico");
             notifyIcon.Visible = true;
+            notifyIcon.ContextMenu = contextMenu;
             notifyIcon.DoubleClick += delegate (object sender, EventArgs args)
             {
                 if (WindowState == WindowState.Normal)
