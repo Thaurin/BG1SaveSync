@@ -129,11 +129,16 @@ namespace BG1SaveSync
                 string saveGameLocation;
                 SaveGame selectedSaveGame = (SaveGame)SavesCombo.SelectedValue;
 
-                ImagePanel.Children.Clear();
-
                 if (FromSaveRadio.IsChecked == true)
                 {
                     saveGameLocation = $"{SaveDirTextBox.Text}\\{selectedSaveGame.Name}";
+
+                    if (!Directory.Exists(saveGameLocation))
+                    {
+                        MessageBox.Show("Save game directory no longer exists!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        RescanSaveFolder();
+                        return;
+                    }
                 }
                 else
                 {
@@ -153,9 +158,18 @@ namespace BG1SaveSync
                         }
                     }
 
+                    if (!File.Exists($"{SharedDirTextBox.Text}\\{selectedSaveGame.ZipName}"))
+                    {
+                        MessageBox.Show("Save game no longer exists!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        RescanSaveFolder();
+                        return;
+                    }
+
                     Directory.CreateDirectory(saveGameLocation);
                     ZipFile.ExtractToDirectory($"{SharedDirTextBox.Text}\\{selectedSaveGame.ZipName}", saveGameLocation);
                 }
+
+                ImagePanel.Children.Clear();
 
                 // Screenshot
                 string screenShotFileName = $"{saveGameLocation}\\BALDUR.bmp";
