@@ -133,11 +133,11 @@ namespace BG1SaveSync
 
                 if (FromSaveRadio.IsChecked == true)
                 {
-                    saveGameLocation = $"{SaveDirTextBox.Text}\\{selectedSaveGame.FullName}";
+                    saveGameLocation = $"{SaveDirTextBox.Text}\\{selectedSaveGame.Name}";
                 }
                 else
                 {
-                    saveGameLocation = $"{appFolder.TempFolderLocation}\\{selectedSaveGame.FullName}";
+                    saveGameLocation = $"{appFolder.TempFolderLocation}\\{selectedSaveGame.Name}";
 
                     // Make sure that there is no trash lying around
                     if (Directory.Exists(saveGameLocation))
@@ -154,7 +154,7 @@ namespace BG1SaveSync
                     }
 
                     Directory.CreateDirectory(saveGameLocation);
-                    ZipFile.ExtractToDirectory($"{SharedDirTextBox.Text}\\{selectedSaveGame.FullName}", saveGameLocation);
+                    ZipFile.ExtractToDirectory($"{SharedDirTextBox.Text}\\{selectedSaveGame.ZipName}", saveGameLocation);
                 }
 
                 // Screenshot
@@ -272,13 +272,13 @@ namespace BG1SaveSync
 
             if (FromSaveRadio.IsChecked == true)
             {
-                source = $"{SaveDirTextBox.Text}\\{selectedSaveGame.FullName}";
-                destination = $"{SharedDirTextBox.Text}\\{selectedSaveGame.Name}.bg1save";
+                source = $"{SaveDirTextBox.Text}\\{selectedSaveGame.Name}";
+                destination = $"{SharedDirTextBox.Text}\\{selectedSaveGame.ZipName}";
             }
             else
             {
-                source = $"{SharedDirTextBox.Text}\\{selectedSaveGame.FullName}";
-                destination = $"{SaveDirTextBox.Text}\\000000000-{selectedSaveGame.Name}";
+                source = $"{SharedDirTextBox.Text}\\{selectedSaveGame.ZipName}";
+                destination = $"{SaveDirTextBox.Text}\\{selectedSaveGame.Name}";
             }
 
             bool destinationExists = FromSaveRadio.IsChecked == true ? File.Exists(destination) : Directory.Exists(destination);

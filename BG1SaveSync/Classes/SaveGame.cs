@@ -7,23 +7,23 @@ namespace BG1SaveSync.Classes
 {
     public class SaveGame
     {
-        public string FullName { get; set; }
         public string Name { get; set; }
+        public string ZipName { get; set; }
         public DateTime Date;
         public string DateString => $"{Date.ToShortDateString()}";
         public string TimeString => $"{Date.ToShortTimeString()}";
 
         public SaveGame(DirectoryInfo dirInfo)
         {
-            FullName = dirInfo.Name;
-            Name = FullName.Substring(FullName.LastIndexOf('\\') + 11);
+            Name = dirInfo.Name;
+            ZipName = $"{Name}.bg1save";
             Date = dirInfo.CreationTime;
         }
 
         public SaveGame(FileInfo fileInfo)
         {
-            FullName = fileInfo.Name;
-            Name = FullName.Substring(0, FullName.Length - ".bg1save".Length);
+            ZipName = fileInfo.Name;
+            Name = ZipName.Substring(0, ZipName.Length - ".bg1save".Length);
             Date = fileInfo.CreationTime;
         }
 
