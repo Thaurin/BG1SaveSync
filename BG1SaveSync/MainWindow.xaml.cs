@@ -30,6 +30,46 @@ namespace BG1SaveSync
     {
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private AppFolder appFolder;
+        private bool minimizedBalloonShown = false;
+
+        protected override void OnInitialized(EventArgs e)
+        {
+            // Handle system tray icon
+            System.Windows.Forms.ContextMenu contextMenu = new System.Windows.Forms.ContextMenu();
+            System.Windows.Forms.MenuItem menuItem;
+
+            menuItem = new System.Windows.Forms.MenuItem { Text = "Open", Index = 0 };
+            menuItem.Click += new EventHandler((object sender, EventArgs args) => { BringToFront(); });
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new System.Windows.Forms.MenuItem { Text = "Exit", Index = 1 };
+            menuItem.Click += new EventHandler((object sender, EventArgs args) => { Application.Current.Shutdown(); });
+            contextMenu.MenuItems.Add(menuItem);
+
+            Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/BG1SaveSync;component/BG1SaveSync.ico")).Stream;
+            notifyIcon = new System.Windows.Forms.NotifyIcon
+            {
+                Text = "BG1SaveSync",
+                Icon = new System.Drawing.Icon(iconStream),
+                Visible = false,
+                ContextMenu = contextMenu
+            };
+
+            notifyIcon.DoubleClick += delegate (object sender, EventArgs args)
+            {
+                if (WindowState == WindowState.Normal)
+                {
+                    WindowState = WindowState.Minimized;
+                }
+                else
+                {
+                    Show();
+                    WindowState = WindowState.Normal;
+                }
+            };
+
+            base.OnInitialized(e);
+        }
 
         protected override void OnStateChanged(EventArgs e)
         {
@@ -37,11 +77,16 @@ namespace BG1SaveSync
             {
                 this.Hide();
                 notifyIcon.Visible = true;
-                notifyIcon.ShowBalloonTip(
-                    3000,
-                    "Application minimized",
-                    "The application is still running in the system tray.",
-                    System.Windows.Forms.ToolTipIcon.Info);
+
+                if (!minimizedBalloonShown)
+                {
+                    minimizedBalloonShown = true;
+                    notifyIcon.ShowBalloonTip(
+                        3000,
+                        "Application minimized",
+                        "The application is still running in the background.",
+                        System.Windows.Forms.ToolTipIcon.Info);
+                }
             }
             else
             {
@@ -57,11 +102,6 @@ namespace BG1SaveSync
             base.OnClosing(e);
         }
 
-        private void ContextMenuExit_Click(object Sender, EventArgs e)
-        {
-            Application.Current.Shutdown();
-        }
-
         public MainWindow()
         {
             appFolder = new AppFolder();
@@ -72,29 +112,6 @@ namespace BG1SaveSync
                 return;
             }
 
-            // Handle system tray icon
-            System.Windows.Forms.ContextMenu contextMenu = new System.Windows.Forms.ContextMenu();
-            System.Windows.Forms.MenuItem menuItem = new System.Windows.Forms.MenuItem { Text = "Exit", Index = 0 };
-            menuItem.Click += new EventHandler(ContextMenuExit_Click);
-            contextMenu.MenuItems.Add(menuItem);
-
-            notifyIcon = new System.Windows.Forms.NotifyIcon();
-            notifyIcon.Icon = new System.Drawing.Icon("BG1SaveSync.ico");
-            notifyIcon.Visible = false;
-            notifyIcon.ContextMenu = contextMenu;
-            notifyIcon.DoubleClick += delegate (object sender, EventArgs args)
-            {
-                if (WindowState == WindowState.Normal)
-                {
-                    WindowState = WindowState.Minimized;
-                }
-                else
-                {
-                    Show();
-                    WindowState = WindowState.Normal;
-                }
-            };
-
             // Monitor game process
             var task = Task.Run(() =>
             {
@@ -104,7 +121,7 @@ namespace BG1SaveSync
                     if (processes.Length > 0)
                     {
                         processes[0].WaitForExit();
-                        Dispatcher.Invoke((Action)(() => BrintToFront()));
+                        Dispatcher.Invoke((Action)(() => BringToFront()));
                     }
                     Thread.Sleep(10000);
                 } while (true);
@@ -116,7 +133,7 @@ namespace BG1SaveSync
             RescanSaveFolder();
         }
 
-        private void BrintToFront()
+        private void BringToFront()
         {
             if (!IsVisible)
             {

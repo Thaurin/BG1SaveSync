@@ -164,9 +164,7 @@ namespace Microsoft.Shell
             IntPtr argv = IntPtr.Zero;
             try
             {
-                int numArgs = 0;
-
-                argv = _CommandLineToArgvW(cmdLine, out numArgs);
+                argv = _CommandLineToArgvW(cmdLine, out int numArgs);
                 if (argv == IntPtr.Zero)
                 {
                     throw new Win32Exception();
@@ -280,8 +278,7 @@ namespace Microsoft.Shell
             string channelName = String.Concat(applicationIdentifier, Delimiter, ChannelNameSuffix);
 
             // Create mutex based on unique application Id to check if this is the first instance of the application. 
-            bool firstInstance;
-            singleInstanceMutex = new Mutex(true, applicationIdentifier, out firstInstance);
+            singleInstanceMutex = new Mutex(true, applicationIdentifier, out bool firstInstance);
             if (firstInstance)
             {
                 CreateRemoteService(channelName);
@@ -372,11 +369,12 @@ namespace Microsoft.Shell
         {
             BinaryServerFormatterSinkProvider serverProvider = new BinaryServerFormatterSinkProvider();
             serverProvider.TypeFilterLevel = TypeFilterLevel.Full;
-            IDictionary props = new Dictionary<string, string>();
-
-            props["name"] = channelName;
-            props["portName"] = channelName;
-            props["exclusiveAddressUse"] = "false";
+            IDictionary props = new Dictionary<string, string>
+            {
+                ["name"] = channelName,
+                ["portName"] = channelName,
+                ["exclusiveAddressUse"] = "false"
+            };
 
             // Create the IPC Server channel with the channel properties
             channel = new IpcServerChannel(props, serverProvider);
