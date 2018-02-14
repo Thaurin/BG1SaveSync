@@ -36,6 +36,16 @@ namespace BG1SaveSync
             if (WindowState == WindowState.Minimized)
             {
                 this.Hide();
+                notifyIcon.Visible = true;
+                notifyIcon.ShowBalloonTip(
+                    3000,
+                    "Application minimized",
+                    "The application is still running in the system tray.",
+                    System.Windows.Forms.ToolTipIcon.Info);
+            }
+            else
+            {
+                notifyIcon.Visible = false;
             }
             base.OnStateChanged(e);
         }
@@ -70,7 +80,7 @@ namespace BG1SaveSync
 
             notifyIcon = new System.Windows.Forms.NotifyIcon();
             notifyIcon.Icon = new System.Drawing.Icon("BG1SaveSync.ico");
-            notifyIcon.Visible = true;
+            notifyIcon.Visible = false;
             notifyIcon.ContextMenu = contextMenu;
             notifyIcon.DoubleClick += delegate (object sender, EventArgs args)
             {
