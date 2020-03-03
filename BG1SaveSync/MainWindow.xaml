@@ -5,23 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BG1SaveSync"
         mc:Ignorable="d"
-        Title="BG1SaveSync" Width="596" Height="440"
+        Title="BG1SaveSync" SizeToContent="WidthAndHeight" MaxWidth="800" MaxHeight="600"
         ResizeMode="CanMinimize">
     <StackPanel Orientation="Vertical" Margin="10,0" HorizontalAlignment="Center" VerticalAlignment="Top">
         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
             <Label Content="Baldur's Gate 1 save game folder" HorizontalAlignment="Left" VerticalAlignment="Top" Height="27"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <TextBox Name="SaveDirTextBox" IsReadOnly="True" HorizontalAlignment="Left" Width="485" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" />
-            <Button Name="SaveDirBrowseButton" Content="Browse" Margin="5,0" Width="50" Height="23" Click="BrowseButton_Click" />
+            <TextBox Name="SaveDirTextBox" IsReadOnly="True" HorizontalAlignment="Left" Width="485" Height="25" TextWrapping="Wrap" VerticalAlignment="Top" />
+            <Button Name="SaveDirBrowseButton" Content="Browse" Margin="0" Width="83" Height="25" Click="BrowseButton_Click" />
         </StackPanel>
 
         <StackPanel Orientation="Horizontal">
             <Label Content="Shared folder" HorizontalAlignment="Left" VerticalAlignment="Top" Height="27"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <TextBox Name="SharedDirTextBox" IsReadOnly="True" HorizontalAlignment="Left" Width="485" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" />
-            <Button Name="SharedDirBrowseButton" Content="Browse" Margin="5,0" Width="50" Height="23" Click="BrowseButton_Click" />
+            <TextBox Name="SharedDirTextBox" IsReadOnly="True" HorizontalAlignment="Left" Width="485" Height="25" TextWrapping="Wrap" VerticalAlignment="Top" />
+            <Button Name="SharedDirBrowseButton" Content="Browse" Margin="0" Width="83" Height="25" Click="BrowseButton_Click" />
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
@@ -37,10 +37,10 @@
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-            <Label Content="Save games" HorizontalAlignment="Left" VerticalAlignment="Top" Height="27" />
+            <Label Content="Save games" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <ComboBox Name="SavesCombo" HorizontalAlignment="Stretch" SelectionChanged="SavesCombo_SelectionChanged">
+            <ComboBox Height="25" Name="SavesCombo" HorizontalAlignment="Stretch" SelectionChanged="SavesCombo_SelectionChanged" Width="570">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -62,12 +62,18 @@
             <WrapPanel Margin="0,10" Name="ImagePanel"></WrapPanel>
         </StackPanel>
 
-        <DockPanel Width="530">
+        <DockPanel Margin="0">
             <Button
                 Content="Transfer"
                 HorizontalAlignment="Right"
-                Width="75"
+                Margin="0"
+                Width="83"
+                Height="25"
                 Click="TransferButton_Click" />
         </DockPanel>
+
+        <StackPanel Orientation="Horizontal">
+            <WrapPanel Margin="5" Name="EmptyPanel"></WrapPanel>
+        </StackPanel>
     </StackPanel>
 </Window>
