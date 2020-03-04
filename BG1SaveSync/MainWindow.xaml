@@ -12,16 +12,18 @@
             <Label Content="Baldur's Gate 1 save game folder" HorizontalAlignment="Left" VerticalAlignment="Top" Height="27"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <TextBox Name="SaveDirTextBox" IsReadOnly="True" HorizontalAlignment="Left" Width="485" Height="25" TextWrapping="Wrap" VerticalAlignment="Top" />
+            <TextBox Name="SaveDirTextBox" IsReadOnly="True" HorizontalAlignment="Left" Width="400" Height="25" TextWrapping="Wrap" VerticalAlignment="Top" />
             <Button Name="SaveDirBrowseButton" Content="Browse" Margin="0" Width="83" Height="25" Click="BrowseButton_Click" />
+            <Button Name="SaveDirOpenButton" Content="Open" Margin="0" Width="83" Height="25" Click="OpenButton_Click" />
         </StackPanel>
 
         <StackPanel Orientation="Horizontal">
             <Label Content="Shared folder" HorizontalAlignment="Left" VerticalAlignment="Top" Height="27"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <TextBox Name="SharedDirTextBox" IsReadOnly="True" HorizontalAlignment="Left" Width="485" Height="25" TextWrapping="Wrap" VerticalAlignment="Top" />
+            <TextBox Name="SharedDirTextBox" IsReadOnly="True" HorizontalAlignment="Left" Width="400" Height="25" TextWrapping="Wrap" VerticalAlignment="Top" />
             <Button Name="SharedDirBrowseButton" Content="Browse" Margin="0" Width="83" Height="25" Click="BrowseButton_Click" />
+            <Button Name="SharedDirOpenButton" Content="Open" Margin="0" Width="83" Height="25" Click="OpenButton_Click" />
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
@@ -40,7 +42,7 @@
             <Label Content="Save games" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-            <ComboBox Height="25" Name="SavesCombo" HorizontalAlignment="Stretch" SelectionChanged="SavesCombo_SelectionChanged" Width="570">
+            <ComboBox Height="25" Name="SavesCombo" HorizontalAlignment="Stretch" SelectionChanged="SavesCombo_SelectionChanged" Width="565">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>

@@ -300,6 +300,16 @@ namespace BG1SaveSync
             }
         }
 
+        private void OpenButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button senderButton = (Button)sender;
+            string target = senderButton.Name == "SaveDirOpenButton" ? SaveDirTextBox.Text : SharedDirTextBox.Text;
+            if (Directory.Exists(target))
+            {
+                Process.Start(target);
+            }
+        }
+
         private void SavesCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             RescanSelectedSaveGame();
