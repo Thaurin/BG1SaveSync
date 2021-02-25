@@ -89,7 +89,7 @@ namespace BG1SaveSync.Classes
                 foreach (string configLine in configFile)
                 {
                     string trimmedLine = configLine.Trim();
-                    if (trimmedLine == "" || trimmedLine.Substring(0, 1) == "#") continue;
+                    if (trimmedLine == "" || trimmedLine.Substring(0, 1) == ";") continue;
 
                     string[] splitLine = trimmedLine.Split('=');
                     if (splitLine.Length != 2)
@@ -132,7 +132,7 @@ namespace BG1SaveSync.Classes
 
             using (StreamWriter file = new StreamWriter(ConfigFileLocation))
             {
-                file.WriteLine("# BG1SaveSync ini file. Blank lines are ignored.");
+                file.WriteLine("; BG1SaveSync ini file. Blank lines and lines starting with a semi-colon are ignored.");
 
                 foreach (KeyValuePair<string, string> configItem in Config)
                 {
